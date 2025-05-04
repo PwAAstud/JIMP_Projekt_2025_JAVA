@@ -3,9 +3,10 @@ package cutGraf;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 
-public class Graf {
+public class Graf{
     private int maxInRow;
     private ArrayList<Node> grafNodes = new ArrayList<Node>();
 
@@ -60,8 +61,63 @@ public class Graf {
             }
         }
 
+
         // for (Node n : grafNodes) {
         //     System.err.println(n.getId() + " " + n.getConection());
         // }
+    }
+
+    public Graf cutGraf(GrafCutFinder metod, double margin){
+        int minSize = (int)Math.ceil((2-margin)*grafNodes.size()/4);
+        if(minSize <= 0){
+            minSize=1;
+        }
+        if(grafNodes.size() - 2*minSize < 0){
+            return null;
+        }
+
+        Graf retGraf = new Graf();
+        retGraf.maxInRow = maxInRow;
+        retGraf.grafNodes = metod.nodesForSecentGraf(grafNodes, minSize);
+        Collections.sort(retGraf.grafNodes);
+        // System.out.println(retGraf.grafNodes);
+        if(retGraf.grafNodes.size() == 0){
+            return null;
+        }
+
+        ArrayList<Node> myNewNodes = new ArrayList<Node>();
+        int i = 0;
+        for (Node nodeInB : retGraf.grafNodes) {
+            // System.out.println(nodeInB);
+            // System.out.println(i);
+            while (grafNodes.get(i) != nodeInB) {
+                // System.out.println(grafNodes.get(i));
+                myNewNodes.add( grafNodes.get(i) );
+                i+=1;
+            }
+            i+=1;
+            // System.out.println(i);
+            if(i == grafNodes.size()){
+                break;
+            }
+        }
+        for(; i<grafNodes.size(); i+=1){
+            myNewNodes.add( grafNodes.get(i) );
+        }
+        // System.out.println(myNewNodes);
+        grafNodes = myNewNodes;
+
+        for (Node NodeA : this.grafNodes) {
+            for (Node NodeB : retGraf.grafNodes) {
+                NodeB.removeConectTo(NodeA);
+            }
+        }
+
+        return retGraf;
+    }
+
+    @Override
+    public String toString() {
+        return grafNodes.toString();
     }
 }

@@ -29,8 +29,15 @@ public class Node implements Comparable<Node>{
     }
 
     public void conectTo(Node conectWith){
+        conection.remove(conectWith);
+        conectWith.conection.remove(this);
         conection.add(conectWith);
         conectWith.conection.add(this);
+    }
+
+    public void removeConectTo(Node conectWith){
+        conection.remove(conectWith);
+        conectWith.conection.remove(this);
     }
 
     @Override
@@ -40,6 +47,14 @@ public class Node implements Comparable<Node>{
 
     @Override
     public String toString() {
-        return String.valueOf(id);
+        String conString = "";
+        for (Node node : conection) {
+            conString += node.id + " ";
+        }
+        if(conString != ""){
+            conString = conString.substring(0, conString.length()-1);
+        }
+        conString = "(" + conString + ")";
+        return String.valueOf(id) + ":"+conString;
     }
 }
