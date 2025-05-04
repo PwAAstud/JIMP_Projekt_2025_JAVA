@@ -3,6 +3,8 @@ package cutGraf;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -61,36 +63,33 @@ public class StonerCut implements GrafCutFinder{
 
     // start
 
-    // zwraca index to elemntu z listy indexList
-    private int indexOfMaxWeing(ArrayList<WeightNode> weighGraf, int[] weights, ArrayList<Integer> indexList){
-        int maxWeight = 0;
+    // zwraca index to weighGraf i weights
+    private int indexOfMaxWeing(ArrayList<WeightNode> weighGraf, int[] weights, List<Integer> indexList){
+        int maxWeight = indexList.get(0);
         for (int i = 1; i<indexList.size();i++) {
             int indexFromList = indexList.get(i);
             if(weights[maxWeight] < weights[indexFromList]){
-                maxWeight = i;
+                maxWeight = indexFromList;
             }
             if(weights[maxWeight] != weights[indexFromList]){
                 continue;
             }
             if(weighGraf.get(maxWeight).compinationOf.size() > weighGraf.get(indexFromList).compinationOf.size()){
-                maxWeight = i;
+                maxWeight = indexFromList;
             }
             // if(rand.nextBoolean()){
             //     maxWeight = i;
             // }
         }
+        // System.out.println(maxWeight);
         return maxWeight;
     }
 
-    private void addToBlock(ArrayList<WeightNode> weighGraf, HashMap<WeightNode, Integer> translatr, int[] weightToMain, ArrayList<Integer> indexToCheck, int indexOfIndexList){
-        // System.out.println(indexOfIndexList);
-        int indexToAdd = indexToCheck.get(indexOfIndexList);
-        
-        indexToCheck.set(indexOfIndexList, indexToCheck.get(indexToCheck.size()-1));
-        indexToCheck.remove(indexToCheck.get(indexToCheck.size()-1));
+    private void addToBlock(ArrayList<WeightNode> weighGraf, HashMap<WeightNode, Integer> translatr, int[] weightToMain, ArrayList<Integer> indexToCheck, int indexChosen){
+        indexToCheck.remove(Integer.valueOf(indexChosen));
 
-        weightToMain[indexToAdd] = -1; // czy odwiedzony
-        for (Map.Entry<WeightNode, Integer> c : weighGraf.get(indexToAdd).conection.entrySet()) {
+        weightToMain[indexChosen] = -1; // czy odwiedzony
+        for (Map.Entry<WeightNode, Integer> c : weighGraf.get(indexChosen).conection.entrySet()) {
             int indexInGraf = translatr.get(c.getKey());
             if(weightToMain[indexInGraf] == -1){
                 continue;
@@ -110,22 +109,22 @@ public class StonerCut implements GrafCutFinder{
             nodeToIndex.put(weighGraf.get(i), i);
         }
         ArrayList<Integer> indexToCheck = new ArrayList<Integer>();
-        indexToCheck.add(rand.nextInt(weighGraf.size()));
-        // indexToCheck.add(0);
+        // indexToCheck.add(rand.nextInt(weighGraf.size()));
+        indexToCheck.add(0);
 
         long sumA = 0;
         long sumB = 0;
         for(int i=1; i < weighGraf.size(); i++){
-            // System.out.println(indexToCheck);
+            // System.out.println(indexToCheck.size());
             // for (int j = 0; j < weightToMain.length; j++) {
             //     System.out.print(weightToMain[j]+" ");                
             // }
             // System.out.println();
             long start = System.nanoTime();   
-            int indexOfIndexList = indexOfMaxWeing(weighGraf, weightToMain, indexToCheck);
+            int indexChosen = indexOfMaxWeing(weighGraf, weightToMain, indexToCheck);
             sumA += (System.nanoTime() - start);
             start = System.nanoTime();
-            addToBlock(weighGraf, nodeToIndex, weightToMain, indexToCheck, indexOfIndexList);
+            addToBlock(weighGraf, nodeToIndex, weightToMain, indexToCheck, indexChosen);
             sumB += (System.nanoTime() - start);
         }
         sumA /= 1000000;
