@@ -3,7 +3,6 @@ package cutGraf;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -85,19 +84,27 @@ public class StonerCut implements GrafCutFinder{
         return maxWeight;
     }
 
-    private void addToBlock(ArrayList<WeightNode> weighGraf, HashMap<WeightNode, Integer> translatr, int[] weightToMain, ArrayList<Integer> indexToCheck, int indexChosen){
-        indexToCheck.remove(Integer.valueOf(indexChosen));
-
-        weightToMain[indexChosen] = -1; // czy odwiedzony
+    // nie usuwa element indexChosen z list
+    private void addToBlock(ArrayList<WeightNode> weighGraf, HashMap<WeightNode, Integer> translatr, int[] weightToMain, ArrayList<Integer> priIndexToCheck, ArrayList<Integer> lowIndexToCheck, int indexChosen){
+        weightToMain[indexChosen] = -1; // -1 == odwiedzony
         for (Map.Entry<WeightNode, Integer> c : weighGraf.get(indexChosen).conection.entrySet()) {
             int indexInGraf = translatr.get(c.getKey());
             if(weightToMain[indexInGraf] == -1){
                 continue;
             }
-            if(weightToMain[indexInGraf] == 0){
-                indexToCheck.add(indexInGraf);
+            boolean inLowList = false;
+            if(weightToMain[indexInGraf] == 1){
+                inLowList = true;
             }
             weightToMain[indexInGraf] += c.getValue();
+            if(weightToMain[indexInGraf] >= 2){
+                if(inLowList){
+                    lowIndexToCheck.remove(Integer.valueOf(indexInGraf));
+                }
+                priIndexToCheck.add(indexInGraf);
+            }else{
+                lowIndexToCheck.add(indexInGraf);
+            }
         }
     }
 
@@ -108,30 +115,43 @@ public class StonerCut implements GrafCutFinder{
             weightToMain[i] = 0;
             nodeToIndex.put(weighGraf.get(i), i);
         }
-        ArrayList<Integer> indexToCheck = new ArrayList<Integer>();
+        ArrayList<Integer> priIndexToCheck = new ArrayList<Integer>(); // piorytet
+        ArrayList<Integer> lowIndexToCheck = new ArrayList<Integer>();
         // indexToCheck.add(rand.nextInt(weighGraf.size()));
-        indexToCheck.add(0);
+        lowIndexToCheck.add(0);
 
         long sumA = 0;
         long sumB = 0;
         for(int i=1; i < weighGraf.size(); i++){
-            // System.out.println(indexToCheck.size());
+            // System.out.println(priIndexToCheck);
+            // System.out.println(lowIndexToCheck);
             // for (int j = 0; j < weightToMain.length; j++) {
             //     System.out.print(weightToMain[j]+" ");                
             // }
             // System.out.println();
             long start = System.nanoTime();   
-            int indexChosen = indexOfMaxWeing(weighGraf, weightToMain, indexToCheck);
+            int indexChosen;
+            if(priIndexToCheck.size() > 0){
+                indexChosen = indexOfMaxWeing(weighGraf, weightToMain, priIndexToCheck);
+                priIndexToCheck.remove(Integer.valueOf(indexChosen));
+            }else{
+                indexChosen = indexOfMaxWeing(weighGraf, weightToMain, lowIndexToCheck);
+                lowIndexToCheck.remove(Integer.valueOf(indexChosen));
+            }
             sumA += (System.nanoTime() - start);
             start = System.nanoTime();
-            addToBlock(weighGraf, nodeToIndex, weightToMain, indexToCheck, indexChosen);
+            addToBlock(weighGraf, nodeToIndex, weightToMain, priIndexToCheck, lowIndexToCheck, indexChosen);
             sumB += (System.nanoTime() - start);
         }
         sumA /= 1000000;
         sumB /= 1000000;
-        System.out.println(sumA + " " + sumB);
+        // System.out.println(sumA + " " + sumB);
         // System.out.println(indexToCheck);
-        return indexToCheck.get(0);
+        if(priIndexToCheck.size() > 0){
+            return priIndexToCheck.get(0);
+        }else{
+            return lowIndexToCheck.get(0);
+        }
     }
 
     // end
@@ -142,6 +162,7 @@ public class StonerCut implements GrafCutFinder{
 
         WeightNode nodeToMergeWith = null;
         int conectionStrenght = 0;
+        ArrayList<WeightNode> aceptableNodes = new ArrayList<WeightNode>();
         for (Map.Entry<WeightNode, Integer> entry : nodeToRemove.conection.entrySet()) {
             WeightNode entryKey = entry.getKey();
             int entryVal = entry.getValue();
@@ -150,16 +171,25 @@ public class StonerCut implements GrafCutFinder{
                 continue;
             }
             if(entryVal > conectionStrenght){
+                aceptableNodes.clear();
+                aceptableNodes.add(entryKey);
                 conectionStrenght = entryVal;
-                nodeToMergeWith = entryKey;
-            }else if(entryVal == conectionStrenght && rand.nextBoolean()){
-                conectionStrenght = entryVal;
-                nodeToMergeWith = entryKey;
+                // nodeToMergeWith = entryKey;
             }
+            else if(entryVal == conectionStrenght){
+                aceptableNodes.add(entryKey);
+            }
+            // System.out.println(aceptableNodes);
+            // else if(entryVal == conectionStrenght && rand.nextBoolean()){
+            //     conectionStrenght = entryVal;
+            //     nodeToMergeWith = entryKey;
+            // }
         }
-        if(nodeToMergeWith == null){
+        System.out.println(aceptableNodes.size());
+        if(aceptableNodes.size() == 0){
             return false;
         }
+        nodeToMergeWith = aceptableNodes.get(rand.nextInt(aceptableNodes.size()));
 
         nodeToMergeWith.addMerge(nodeToRemove);
 
@@ -205,9 +235,13 @@ public class StonerCut implements GrafCutFinder{
             WeightNode nodeToChek = weighGraf.get(fardesIndex);
             int nodeToChekSize = nodeToChek.compinationOf.size();
             if(nodeToChekSize >= minSize && nodeToChekSize <= maxSize){
-                if(nodeToChekSize < cutCost){
+                int cutCostOfnewNode = 0;
+                for (Map.Entry<WeightNode, Integer> c : nodeToChek.conection.entrySet()){
+                    cutCostOfnewNode += c.getValue();
+                }
+                if(cutCostOfnewNode < cutCost){
                     retVal = new ArrayList<Node>(nodeToChek.compinationOf);
-                    cutCost = nodeToChekSize;
+                    cutCost = cutCostOfnewNode;
                 }
             }
             if(!removeNode(weighGraf, fardesIndex, maxSize)){
@@ -216,8 +250,8 @@ public class StonerCut implements GrafCutFinder{
 
             // System.out.print((System.nanoTime() - start)/1000000);
 
-            // System.out.println();
         }
+        System.out.println(weighGraf);
 
         // weighGraf.get(3).addMerge(weighGraf.get(4));
         // System.out.println(retVal);
