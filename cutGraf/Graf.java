@@ -2,13 +2,14 @@ package cutGraf;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
-public class Graf implements Iterable<Node>{
+public class Graf{
     private int maxInRow;
     private ArrayList<Node> grafNodes = new ArrayList<Node>();
 
@@ -74,9 +75,88 @@ public class Graf implements Iterable<Node>{
         }
     }
 
-    public static void saveToFile(List<Graf> grafList) throws BrakujeWszystkichId{
-        // throw new BrakujeWszystkichId(1);
+    public static void saveToFileTxt(List<Graf> grafList, String outFileName) throws BrakujeWszystkichId{
         ArrayList<Node> nodesToSave = new ArrayList<Node>();
+        int maxInRowOfGrafs = 0;
+        for (Graf graf : grafList) {
+            if( maxInRowOfGrafs < graf.maxInRow ){
+                maxInRowOfGrafs = graf.maxInRow;
+            }
+            nodesToSave.addAll(graf.grafNodes);
+        }
+        nodesToSave.sort(null);
+
+        // sprawdzanie poprawnosci danych wejsciowych
+        if(nodesToSave.getFirst().getId() != 0){
+            throw new BrakujeWszystkichId(0);
+        }
+        for (int i = 1; i < nodesToSave.size(); i++) {
+            if( (nodesToSave.get(i).getId() - nodesToSave.get(i-1).getId()) != 1){
+                throw new BrakujeWszystkichId(nodesToSave.get(i-1).getId()+1);
+            }
+        }
+
+        ArrayList<Integer> conToSave = new ArrayList<Integer>();
+        ArrayList<ArrayList<Integer>> conRange = new ArrayList<ArrayList<Integer>>();
+        for(Graf graf : grafList){
+            ArrayList<Integer> newList = new ArrayList<Integer>();
+            newList.add(conToSave.size());
+
+            for(Node node : graf.grafNodes){
+                conToSave.add(node.getId());
+                Boolean isBigeId = false;
+                for(Node c : node.getConection()){
+                    if(node.compareTo(c) > 0){
+                        continue;
+                    }
+                    isBigeId = true;
+                    conToSave.add(c.getId());
+                }
+                if(isBigeId == false){
+                    conToSave.removeLast();
+                }else{
+                    newList.add(conToSave.size());
+                }
+            }
+            conRange.add(newList);
+        }
+
+        try {
+            FileWriter writer = new FileWriter(outFileName);
+            writer.write(maxInRowOfGrafs + "\n");
+
+            writer.write(String.valueOf(nodesToSave.get(0).getX()));
+            for (int i = 1; i < nodesToSave.size(); i+=1) {
+                writer.write(";" + nodesToSave.get(i).getX());
+            }
+            writer.write("\n");
+
+            writer.write("0");
+            int curentY = 0;
+            for (Node node : nodesToSave) {
+                for(; curentY != node.getY(); curentY+=1 ){
+                    writer.write(";" + node.getId());
+                }
+            }
+            writer.write(";" + (nodesToSave.getLast().getId()+1) + "\n");
+
+            writer.write( String.valueOf(conToSave.getFirst()) );
+            for (int i = 1; i < conToSave.size(); i++) {
+                writer.write( ";" + conToSave.get(i) );
+            }
+
+            for (ArrayList<Integer> arrayList : conRange) {
+                writer.write("\n" + String.valueOf(arrayList.getFirst()) );
+                for (int i = 1; i < arrayList.size(); i++) {
+                    writer.write( ";" + arrayList.get(i) );
+                }
+            }
+
+            writer.close();
+            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public Graf cutGraf(GrafCutFinder metod, double margin){
@@ -131,10 +211,5 @@ public class Graf implements Iterable<Node>{
     @Override
     public String toString() {
         return grafNodes.toString();
-    }
-
-    @Override
-    public Iterator<Node> iterator() {
-        return grafNodes.iterator();
     }
 }

@@ -8,18 +8,20 @@ public class MainTest {
     public static void main(String[] args) {
         // System.out.println("aaa");
         // Graf aaa;
+        Graf testGraf = new Graf();
+        testGraf.loadFromCsrrg("graf.csrrg");
+        Graf testGrafB = testGraf.cutGraf(new StonerCut(), 1);
+        System.out.println(testGraf);
+        System.out.println(testGrafB);
+        
+        ArrayList<Graf> saveList = new ArrayList<Graf>();
+        saveList.add(testGraf);
+        saveList.add(testGrafB);
+        
         try {
-            Graf.saveToFile(new ArrayList<Graf>());
+            Graf.saveToFileTxt(saveList, "out.txt");
         } catch (BrakujeWszystkichId e) {
             e.printStackTrace();
         }
-        Graf testGraf = new Graf();
-        testGraf.loadFromCsrrg("graf1.csrrg");
-        for (Node node : testGraf) {
-            System.out.println(node);
-        }
-        // Graf testGrafB = testGraf.cutGraf(new StonerCut(), 0.1);
-        // System.out.println(testGraf);
-        // System.out.println(testGrafB);
     }   
 }
