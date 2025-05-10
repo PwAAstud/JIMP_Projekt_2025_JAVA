@@ -269,6 +269,4 @@ public class StonerCut implements GrafCutFinder{
         // throw new UnsupportedOperationException("Unimplemented method 'nodesFromSecentGraf'");
     }
 
-
-
 }

@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
 
-public class Graf{
+public class Graf implements Iterable<Node>{
     private int maxInRow;
     private ArrayList<Node> grafNodes = new ArrayList<Node>();
 
@@ -33,7 +35,6 @@ public class Graf{
         try {
             fileInput = new Scanner(new File(fileName));
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return;
         }
@@ -65,6 +66,17 @@ public class Graf{
         // for (Node n : grafNodes) {
         //     System.err.println(n.getId() + " " + n.getConection());
         // }
+    }
+
+    public static class BrakujeWszystkichId extends Exception {
+        public BrakujeWszystkichId(int lostId) {
+            super("brakuje id " + lostId);
+        }
+    }
+
+    public static void saveToFile(List<Graf> grafList) throws BrakujeWszystkichId{
+        // throw new BrakujeWszystkichId(1);
+        ArrayList<Node> nodesToSave = new ArrayList<Node>();
     }
 
     public Graf cutGraf(GrafCutFinder metod, double margin){
@@ -119,5 +131,10 @@ public class Graf{
     @Override
     public String toString() {
         return grafNodes.toString();
+    }
+
+    @Override
+    public Iterator<Node> iterator() {
+        return grafNodes.iterator();
     }
 }
