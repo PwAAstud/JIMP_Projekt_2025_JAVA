@@ -2,12 +2,16 @@ package cutGraf;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Graf{
     private int maxInRow;
@@ -69,36 +73,14 @@ public class Graf{
         // }
     }
 
-    public static class BrakujeWszystkichId extends Exception {
-        public BrakujeWszystkichId(int lostId) {
-            super("brakuje id " + lostId);
-        }
-    }
+    private static class DataToSave {
+        int maxInRowOfGrafs;
+        ArrayList<Integer> xRow;
+        ArrayList<Integer> yRow;
+        ArrayList<Integer> conToSave;
+        ArrayList<ArrayList<Integer>> conRange;
 
-    public static void saveToFileTxt(List<Graf> grafList, String outFileName) throws BrakujeWszystkichId{
-        ArrayList<Node> nodesToSave = new ArrayList<Node>();
-        int maxInRowOfGrafs = 0;
-        for (Graf graf : grafList) {
-            if( maxInRowOfGrafs < graf.maxInRow ){
-                maxInRowOfGrafs = graf.maxInRow;
-            }
-            nodesToSave.addAll(graf.grafNodes);
-        }
-        nodesToSave.sort(null);
-
-        // sprawdzanie poprawnosci danych wejsciowych
-        if(nodesToSave.getFirst().getId() != 0){
-            throw new BrakujeWszystkichId(0);
-        }
-        for (int i = 1; i < nodesToSave.size(); i++) {
-            if( (nodesToSave.get(i).getId() - nodesToSave.get(i-1).getId()) != 1){
-                throw new BrakujeWszystkichId(nodesToSave.get(i-1).getId()+1);
-            }
-        }
-
-        ArrayList<Integer> conToSave = new ArrayList<Integer>();
-        ArrayList<ArrayList<Integer>> conRange = new ArrayList<ArrayList<Integer>>();
-        for(Graf graf : grafList){
+        private void readGraf(Graf graf){
             ArrayList<Integer> newList = new ArrayList<Integer>();
             newList.add(conToSave.size());
 
@@ -121,40 +103,134 @@ public class Graf{
             conRange.add(newList);
         }
 
+        DataToSave(List<Graf> grafList){
+            ArrayList<Node> nodesToSave = new ArrayList<Node>();
+            maxInRowOfGrafs = 0;
+            for (Graf graf : grafList) {
+                if( maxInRowOfGrafs < graf.maxInRow ){
+                    maxInRowOfGrafs = graf.maxInRow;
+                }
+                nodesToSave.addAll(graf.grafNodes);
+            }
+            nodesToSave.sort(null);
+
+            // sprawdzanie poprawnosci danych wejsciowych
+            if(nodesToSave.getFirst().getId() != 0){
+                throw new IllegalArgumentException("brakuje id 0");
+            }
+            for (int i = 1; i < nodesToSave.size(); i++) {
+                if( (nodesToSave.get(i).getId() - nodesToSave.get(i-1).getId()) != 1){
+                    throw new IllegalArgumentException("brakuje id " + (nodesToSave.get(i-1).getId()+1) );
+                }
+            }
+
+            xRow = new ArrayList<Integer>();
+            yRow = new ArrayList<Integer>();
+
+            int curentY = 0;
+            yRow.add(0);
+            for (Node node : nodesToSave) {
+                xRow.add(node.getX());
+                if(curentY != node.getY()){
+                    yRow.add(node.getId());
+                    curentY+=1;
+                }
+            }
+            yRow.add(nodesToSave.getLast().getId() + 1);
+
+            conToSave = new ArrayList<Integer>();
+            conRange = new ArrayList<ArrayList<Integer>>();
+            for(Graf graf : grafList){
+                readGraf(graf);
+            }
+        }
+    }
+
+    public static void saveToFileTxt(List<Graf> grafList, String outFileName){
+        DataToSave data = new DataToSave(grafList);
+
         try {
             FileWriter writer = new FileWriter(outFileName);
-            writer.write(maxInRowOfGrafs + "\n");
+            writer.write(data.maxInRowOfGrafs + "\n");
 
-            writer.write(String.valueOf(nodesToSave.get(0).getX()));
-            for (int i = 1; i < nodesToSave.size(); i+=1) {
-                writer.write(";" + nodesToSave.get(i).getX());
-            }
-            writer.write("\n");
+            writer.write(
+                data.xRow.stream()
+                .map(o -> String.valueOf(o))
+                .collect(Collectors.joining(";")) + "\n"
+            );
 
-            writer.write("0");
-            int curentY = 0;
-            for (Node node : nodesToSave) {
-                for(; curentY != node.getY(); curentY+=1 ){
-                    writer.write(";" + node.getId());
-                }
-            }
-            writer.write(";" + (nodesToSave.getLast().getId()+1) + "\n");
+            writer.write(
+                data.yRow.stream()
+                .map(o -> String.valueOf(o))
+                .collect(Collectors.joining(";")) + "\n"
+            );
 
-            writer.write( String.valueOf(conToSave.getFirst()) );
-            for (int i = 1; i < conToSave.size(); i++) {
-                writer.write( ";" + conToSave.get(i) );
-            }
+            writer.write(
+                data.conToSave.stream()
+                .map(o -> String.valueOf(o))
+                .collect(Collectors.joining(";"))
+            );
 
-            for (ArrayList<Integer> arrayList : conRange) {
-                writer.write("\n" + String.valueOf(arrayList.getFirst()) );
-                for (int i = 1; i < arrayList.size(); i++) {
-                    writer.write( ";" + arrayList.get(i) );
-                }
+            for (ArrayList<Integer> arrayList : data.conRange) {
+                writer.write(
+                    "\n" +
+                    arrayList.stream()
+                    .map(o -> String.valueOf(o))
+                    .collect(Collectors.joining(";"))
+                );
             }
 
             writer.close();
             
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static byte[] intToByts(int value){
+        byte[] retVal = new byte[Integer.BYTES];
+        for (int i = 0; i < retVal.length; i++) {
+            retVal[i] = (byte) (value & 0xff);
+            value>>=8;
+        }
+        return retVal;
+    }
+
+    public static void saveToFileBinary(List<Graf> grafList, String outFileName) throws IOException{
+        DataToSave data = new DataToSave(grafList);
+
+        try {
+            FileOutputStream output = new FileOutputStream(outFileName);
+
+            output.write(intToByts(data.maxInRowOfGrafs));
+            output.write(intToByts(-2));
+            
+            for (int i : data.xRow) {
+                output.write(intToByts(i));
+            }
+            output.write(intToByts(-2));
+
+            for (int i : data.yRow) {
+                output.write(intToByts(i));
+            }
+            output.write(intToByts(-2));
+
+            for (int i : data.conToSave) {
+                output.write(intToByts(i));
+            }
+            output.write(intToByts(-2));
+
+
+            for (ArrayList<Integer> arrayList : data.conRange) {
+                for (int i : arrayList) {
+                    output.write(intToByts(i));
+                }
+                output.write(intToByts(-2));
+            }
+
+            output.close();
+
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }

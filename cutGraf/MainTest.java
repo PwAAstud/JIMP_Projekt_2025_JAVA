@@ -1,15 +1,14 @@
 package cutGraf;
 
+import java.io.IOException;
 import java.util.ArrayList;
-
-import cutGraf.Graf.BrakujeWszystkichId;
 
 public class MainTest {
     public static void main(String[] args) {
         // System.out.println("aaa");
         // Graf aaa;
         Graf testGraf = new Graf();
-        testGraf.loadFromCsrrg("graf.csrrg");
+        testGraf.loadFromCsrrg("test.csrrg");
         Graf testGrafB = testGraf.cutGraf(new StonerCut(), 1);
         System.out.println(testGraf);
         System.out.println(testGrafB);
@@ -18,9 +17,11 @@ public class MainTest {
         saveList.add(testGraf);
         saveList.add(testGrafB);
         
+        // Graf.saveToFileTxt(saveList, "out.txt");
+
         try {
-            Graf.saveToFileTxt(saveList, "out.txt");
-        } catch (BrakujeWszystkichId e) {
+            Graf.saveToFileBinary(saveList, "out.txt");
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }   
