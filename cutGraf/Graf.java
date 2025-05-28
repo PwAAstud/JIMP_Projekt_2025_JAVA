@@ -1,17 +1,17 @@
 package cutGraf;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Graf{
     private int maxInRow;
@@ -35,7 +35,7 @@ public class Graf{
     }
 
     public void loadFromCsrrg(String fileName){
-        System.err.println(fileName);
+        // System.err.println(fileName);
         Scanner fileInput = null;
         try {
             fileInput = new Scanner(new File(fileName));
@@ -71,6 +71,63 @@ public class Graf{
         // for (Node n : grafNodes) {
         //     System.err.println(n.getId() + " " + n.getConection());
         // }
+    }
+
+    private ArrayList<Integer> readIntLineFromBytes(InputStream input){
+        ArrayList<Integer> retVal = new ArrayList<Integer>();
+        while (true) {
+            int curentInt = 0;
+            byte[] bufer;
+
+            try {
+                bufer = input.readNBytes(4);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+
+            for(int i = 0; i< 4; i++){
+                curentInt |= bufer[i]<<(i*8);
+            }
+            if(curentInt == -1){
+                break;
+            }
+            retVal.add(curentInt);
+        }
+        return retVal;
+    }
+
+    public void loadFromBinary(String fileName){
+        InputStream fileInput = null;
+        try {
+            fileInput = new FileInputStream(fileName);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return;
+        }
+        ArrayList<Integer> line = readIntLineFromBytes(fileInput);
+        maxInRow = line.get(0);
+        ArrayList<Integer> xForNode = readIntLineFromBytes(fileInput);
+        ArrayList<Integer> yRangeNode = readIntLineFromBytes(fileInput);
+        for(int y=0; y < yRangeNode.size()-1; y+=1){
+            int start = yRangeNode.get(y);
+            int end = yRangeNode.get(y+1);
+            for(int id = start; id<end; id+=1){
+                grafNodes.add(new Node(id, xForNode.get(id), y));
+            }
+        }
+
+        ArrayList<Integer> conectionList = readIntLineFromBytes(fileInput);
+        ArrayList<Integer> conectionRange = readIntLineFromBytes(fileInput);
+
+        for(int i=0; i < conectionRange.size()-1; i+=1){
+            int start = conectionRange.get(i);
+            int end = conectionRange.get(i+1);
+            Node curentNode = grafNodes.get(conectionList.get(start));
+            for(int j=start+1; j < end; j+=1){
+                curentNode.conectTo(grafNodes.get(conectionList.get(j)));
+            }
+        }
     }
 
     private static class DataToSave {
@@ -218,14 +275,13 @@ public class Graf{
             for (int i : data.conToSave) {
                 output.write(intToByts(i));
             }
-            output.write(intToByts(-2));
-
+            // output.write(intToByts(-2));
 
             for (ArrayList<Integer> arrayList : data.conRange) {
+                output.write(intToByts(-2));
                 for (int i : arrayList) {
                     output.write(intToByts(i));
                 }
-                output.write(intToByts(-2));
             }
 
             output.close();
@@ -233,6 +289,10 @@ public class Graf{
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public interface GrafCutFinder {
+        ArrayList<Node> nodesForSecentGraf(ArrayList<Node> graf, int minSize);
     }
 
     public Graf cutGraf(GrafCutFinder metod, double margin){

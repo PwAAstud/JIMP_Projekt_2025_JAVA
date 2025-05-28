@@ -8,8 +8,13 @@ public class MainTest {
         // System.out.println("aaa");
         // Graf aaa;
         Graf testGraf = new Graf();
-        testGraf.loadFromCsrrg("test.csrrg");
-        Graf testGrafB = testGraf.cutGraf(new StonerCut(), 1);
+        testGraf.loadFromBinary("graf.out");
+        // testGraf.loadFromCsrrg("test.csrrg");
+        System.out.println(testGraf);
+        System.out.println();
+
+        Graf testGrafB = testGraf.cutGraf(new cutUnconected(), 1);
+        // Graf testGrafB = testGraf.cutGraf(new StonerCut(), 0.9);
         System.out.println(testGraf);
         System.out.println(testGrafB);
         
@@ -19,10 +24,10 @@ public class MainTest {
         
         // Graf.saveToFileTxt(saveList, "out.txt");
 
-        try {
-            Graf.saveToFileBinary(saveList, "out.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // try {
+        //     Graf.saveToFileBinary(saveList, "out.txt");
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
     }   
 }

@@ -57,4 +57,9 @@ public class Node implements Comparable<Node>{
         conString = "(" + conString + ")";
         return String.valueOf(id) + ":"+conString;
     }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
 }

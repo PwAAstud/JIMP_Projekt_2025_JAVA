@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class StonerCut implements GrafCutFinder{
+public class StonerCut implements Graf.GrafCutFinder{
     private Random rand = new Random();
 
     private class WeightNode{
