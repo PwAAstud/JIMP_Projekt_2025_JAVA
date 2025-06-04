@@ -44,9 +44,12 @@ public class Graf{
             return;
         }
         ArrayList<Integer> line = readIntLine(fileInput);
+        // System.out.println(line);
         maxInRow = line.get(0);
         ArrayList<Integer> xForNode = readIntLine(fileInput);
         ArrayList<Integer> yRangeNode = readIntLine(fileInput);
+        // System.out.println(xForNode);
+        // System.out.println(yRangeNode);
         for(int y=0; y < yRangeNode.size()-1; y+=1){
             int start = yRangeNode.get(y);
             int end = yRangeNode.get(y+1);
@@ -57,6 +60,8 @@ public class Graf{
 
         ArrayList<Integer> conectionList = readIntLine(fileInput);
         ArrayList<Integer> conectionRange = readIntLine(fileInput);
+        // System.out.println(conectionList);
+        // System.out.println(conectionRange);
 
         for(int i=0; i < conectionRange.size()-1; i+=1){
             int start = conectionRange.get(i);

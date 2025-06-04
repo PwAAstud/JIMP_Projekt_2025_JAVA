@@ -1,12 +1,10 @@
 package cutGraf;
 
-import java.security.KeyStore.Entry;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Stack;
 
-public class cutUnconected implements Graf.GrafCutFinder{
+public class CutUnconected implements Graf.GrafCutFinder{
 
     @Override
     public ArrayList<Node> nodesForSecentGraf(ArrayList<Node> graf, int minSize) {

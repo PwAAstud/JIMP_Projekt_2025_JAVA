@@ -1,6 +1,5 @@
 package cutGraf;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class MainTest {
@@ -8,12 +7,13 @@ public class MainTest {
         // System.out.println("aaa");
         // Graf aaa;
         Graf testGraf = new Graf();
-        testGraf.loadFromBinary("graf.out");
+        // testGraf.loadFromBinary("test.out");
         // testGraf.loadFromCsrrg("test.csrrg");
+        testGraf.loadFromCsrrg("graf.csrrg");
         System.out.println(testGraf);
         System.out.println();
 
-        Graf testGrafB = testGraf.cutGraf(new cutUnconected(), 1);
+        Graf testGrafB = testGraf.cutGraf(new CombinationCut(), 0.1);
         // Graf testGrafB = testGraf.cutGraf(new StonerCut(), 0.9);
         System.out.println(testGraf);
         System.out.println(testGrafB);
