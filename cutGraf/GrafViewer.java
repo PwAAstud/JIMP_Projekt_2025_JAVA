@@ -197,7 +197,7 @@ public class GrafViewer extends JFrame {
         grafy.clear();
         Graf working = fullGraf;
         for (int i = 0; i < splits - 1; i++) {
-            Graf cut = working.cutGraf(new CombinationCut(), margin);
+            Graf cut = working.cutGraf(new StonerCut(), margin);
             if (cut != null) {
                 grafy.add(cut);
             }
