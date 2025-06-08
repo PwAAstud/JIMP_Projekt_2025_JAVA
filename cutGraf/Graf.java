@@ -79,6 +79,14 @@ public class Graf{
     }
 
     private ArrayList<Integer> readIntLineFromBytes(InputStream input){
+        try {
+            if(input.available() == 0){
+                return null;
+            }
+        } catch (IOException e) {
+            return null;
+        }
+
         ArrayList<Integer> retVal = new ArrayList<Integer>();
         while (true) {
             int curentInt = 0;
@@ -94,7 +102,7 @@ public class Graf{
             for(int i = 0; i< 4; i++){
                 curentInt |= bufer[i]<<(i*8);
             }
-            if(curentInt == -1){
+            if(curentInt < 0){
                 break;
             }
             retVal.add(curentInt);
@@ -123,15 +131,18 @@ public class Graf{
         }
 
         ArrayList<Integer> conectionList = readIntLineFromBytes(fileInput);
-        ArrayList<Integer> conectionRange = readIntLineFromBytes(fileInput);
 
-        for(int i=0; i < conectionRange.size()-1; i+=1){
-            int start = conectionRange.get(i);
-            int end = conectionRange.get(i+1);
-            Node curentNode = grafNodes.get(conectionList.get(start));
-            for(int j=start+1; j < end; j+=1){
-                curentNode.conectTo(grafNodes.get(conectionList.get(j)));
+        ArrayList<Integer> conectionRange = readIntLineFromBytes(fileInput);
+        while (conectionRange != null) {
+            for(int i=0; i < conectionRange.size()-1; i+=1){
+                int start = conectionRange.get(i);
+                int end = conectionRange.get(i+1);
+                Node curentNode = grafNodes.get(conectionList.get(start));
+                for(int j=start+1; j < end; j+=1){
+                    curentNode.conectTo(grafNodes.get(conectionList.get(j)));
+                }
             }
+            conectionRange = readIntLineFromBytes(fileInput);
         }
     }
 
