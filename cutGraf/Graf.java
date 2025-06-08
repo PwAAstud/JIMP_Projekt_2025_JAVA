@@ -79,14 +79,6 @@ public class Graf{
     }
 
     private ArrayList<Integer> readIntLineFromBytes(InputStream input){
-        try {
-            if(input.available() == 0){
-                return null;
-            }
-        } catch (IOException e) {
-            return null;
-        }
-
         ArrayList<Integer> retVal = new ArrayList<Integer>();
         while (true) {
             int curentInt = 0;
@@ -131,9 +123,11 @@ public class Graf{
         }
 
         ArrayList<Integer> conectionList = readIntLineFromBytes(fileInput);
+        // System.out.println(conectionList);
 
         ArrayList<Integer> conectionRange = readIntLineFromBytes(fileInput);
-        while (conectionRange != null) {
+        while (conectionRange.size() > 0) {
+            // System.out.println(conectionRange);
             for(int i=0; i < conectionRange.size()-1; i+=1){
                 int start = conectionRange.get(i);
                 int end = conectionRange.get(i+1);
