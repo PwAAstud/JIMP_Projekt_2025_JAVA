@@ -90,10 +90,17 @@ public class Graf{
                 e.printStackTrace();
                 return null;
             }
-
-            for(int i = 0; i< 4; i++){
-                curentInt |= bufer[i]<<(i*8);
+            if(bufer.length == 0){
+                break;
             }
+            for(int i = 0; i< 4; i++){
+                int b = bufer[i] & 255;
+                // System.out.print(Integer.toBinaryString(b) + " ");
+                curentInt |= b<<(i*8);
+                // System.out.println(Integer.toBinaryString(curentInt));
+            }
+            // System.out.println(curentInt);
+            // System.out.println();
             if(curentInt < 0){
                 break;
             }
@@ -123,11 +130,13 @@ public class Graf{
         }
 
         ArrayList<Integer> conectionList = readIntLineFromBytes(fileInput);
+        // System.out.println(conectionList.size());
         // System.out.println(conectionList);
+        // System.out.println();
 
         ArrayList<Integer> conectionRange = readIntLineFromBytes(fileInput);
         while (conectionRange.size() > 0) {
-            // System.out.println(conectionRange);
+            System.out.println(conectionRange);
             for(int i=0; i < conectionRange.size()-1; i+=1){
                 int start = conectionRange.get(i);
                 int end = conectionRange.get(i+1);

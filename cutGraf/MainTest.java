@@ -7,16 +7,16 @@ public class MainTest {
         // System.out.println("aaa");
         // Graf aaa;
         Graf testGraf = new Graf();
-        // testGraf.loadFromBinary("test.out");
+        testGraf.loadFromBinary("grafBin.out");
         // testGraf.loadFromCsrrg("test.csrrg");
-        testGraf.loadFromCsrrg("graf.csrrg");
+        // testGraf.loadFromCsrrg("graf.csrrg");
         System.out.println(testGraf);
         System.out.println();
 
-        Graf testGrafB = testGraf.cutGraf(new CombinationCut(), 0.1);
+        Graf testGrafB = testGraf.cutGraf(new CutUnconected(), 0.1);
         // Graf testGrafB = testGraf.cutGraf(new StonerCut(), 0.9);
         System.out.println(testGraf);
-        System.out.println(testGrafB);
+        // System.out.println(testGrafB);
         
         ArrayList<Graf> saveList = new ArrayList<Graf>();
         saveList.add(testGraf);

@@ -15,6 +15,8 @@ public class GrafViewer extends JFrame {
     private JTextField marginField = new JTextField("0.1", 5);
     private JTextField splitCountField = new JTextField("2", 3);
     private JTextField outputFileField = new JTextField("output.txt", 15);
+    private Thread cutingThread;
+    JButton loadButton;
 
     private static final Color[] COLORS = {
         Color.RED, Color.BLUE, Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.PINK
@@ -34,7 +36,7 @@ public class GrafViewer extends JFrame {
 
         // Panel kontrolny z przyciskami i polami tekstowymi
         JPanel controlPanel = new JPanel();
-        JButton loadButton = new JButton("Wczytaj graf");
+        loadButton = new JButton("Wczytaj graf");
         JButton runButton = new JButton("Przetnij i Zapisz");
 
         controlPanel.add(loadButton);
@@ -154,7 +156,8 @@ public class GrafViewer extends JFrame {
 
         // Akcje przycisków
         loadButton.addActionListener(e -> loadGraph());
-        runButton.addActionListener(e -> splitAndSaveGraph());
+        // runButton.addActionListener(e -> splitAndSaveGraph());
+        runButton.addActionListener(e -> splitAndSaveGraphThed());
     }
 
     private void loadGraph() {
@@ -163,26 +166,43 @@ public class GrafViewer extends JFrame {
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             fullGraf = new Graf();
-
+            
+            String fileName = selectedFile.getName();
+            int i = fileName.lastIndexOf('.');
+            fileName = fileName.substring(i+1);
             try {
-                fullGraf.loadFromCsrrg(selectedFile.getAbsolutePath());
+                if( fileName.equals("csrrg") ){
+                    fullGraf.loadFromCsrrg(selectedFile.getAbsolutePath());
+                }else if( fileName.equals("out") ){
+                    fullGraf.loadFromBinary(selectedFile.getAbsolutePath());
+                }else{
+                    JOptionPane.showMessageDialog(this, "nieznane rozszerzenie");
+                    return;
+                }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Błąd podczas wczytywania pliku: " + ex.getMessage());
                 return;
             }
 
             grafy.clear();
-            grafy.add(fullGraf);
+
+            do {
+                Graf tempG = fullGraf.cutGraf(new CutUnconected(), i);
+                grafy.add(fullGraf);
+                fullGraf = tempG;
+            } while (fullGraf != null);
+
             grafPanel.revalidate(); // odśwież rozmiar panelu
             grafPanel.repaint();
         }
     }
 
     private void splitAndSaveGraph() {
-        if (fullGraf == null) {
+        if (grafy.size() == 0) {
             JOptionPane.showMessageDialog(this, "Najpierw załaduj graf!");
             return;
         }
+        loadButton.setEnabled(false);
 
         double margin;
         int splits;
@@ -194,16 +214,23 @@ public class GrafViewer extends JFrame {
             return;
         }
 
-        grafy.clear();
-        Graf working = fullGraf;
+        // grafy.clear();
+        int grafi = 0;
+        Graf working = grafy.get(grafi);
         for (int i = 0; i < splits - 1; i++) {
             Graf cut = working.cutGraf(new StonerCut(), margin);
             if (cut != null) {
                 grafy.add(cut);
+            }else if(++grafi < grafy.size()){
+                working = grafy.get(grafi);
+                i--;
+            }else{
+                break;
             }
         }
-        grafy.add(working); // ostatnia część
-
+        // grafy.add(working); // ostatnia część
+        
+        loadButton.setEnabled(true);
         try {
             Graf.saveToFileTxt(grafy, outputFileField.getText());
         } catch (Exception ex) {
@@ -213,6 +240,23 @@ public class GrafViewer extends JFrame {
 
         grafPanel.revalidate();
         grafPanel.repaint();
+    }
+
+    private void splitAndSaveGraphThed(){
+        cutingThread = new Thread(){
+            {
+                setDaemon(true);
+            }
+            @Override
+            public void run() {
+                splitAndSaveGraph();
+                // // super.run();
+                grafPanel.revalidate();
+                grafPanel.repaint();
+                Thread.currentThread().interrupt();
+            }
+        };
+        cutingThread.start();
     }
 
     public static void main(String[] args) {
