@@ -1,0 +1,79 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\graphicspath{ {.} }
+
+\title{dokumentacja Jimp 2025 JAVA}
+\author{Kamil Gomuła, Artur Arciszewski}
+
+\begin{document}
+
+\maketitle
+
+
+
+\section{Cel programu }
+
+Załadowanie i wizualizacja grafu oraz umożliwienie podzielenia tego grafu w taki sposób, aby zachować margines jednocześnie przecinając możliwie najmniej połączeń. Graf jest zapisany w pliku w formacie \textit{csrrg.}
+
+\section{Użycie programu: }
+
+Kompilowanie i odpalanie programu różni się w zależności od programu operacyjnego maszyny użytkownika
+\begin{itemize}
+    \item Windows
+
+w terminalu należy wpisać make.bat a potem start.bat aby uruchomić aplikację
+\end{itemize}
+
+\begin{itemize}
+    \item  Linux
+
+    należy w terminalu wpisać make compile a następnie make run aby uruchomić nasz program
+\end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.85\linewidth]{Ekran aplikacji z przykładowym grafem.png}
+    \caption{Ekran aplikacji z przykładowym grafem}
+    \label{fig:enter-label}
+\end{figure}
+
+
+Po uruchomieniu pojawi się okno aplikacji, gdzie na górze okna są odpowiednio:
+
+przycisk do wyszukania pliku wejściowego, marginesu dla ciecia grafu (liczba zostaje przekształcona na procenty zatem 1 to 100\%), ilość cięć jakie są do wykonania, nazwa pliku wyjściowego (domyślnie output.txt) oraz przycisk tnący graf i zapisujący go do pliku.
+
+Oddzielne grafy z jednego pliku są rozróżniane kolorami na interfejsie graficznym.
+
+
+\section{Opis plików wejściowych}
+
+\subsection{plik .csrrg}
+Plik csrrg składa się z wielu linii. Poniżej opisane jest znaczenie poszczególnych linii:
+\begin{enumerate}
+    \item Maksymalna możliwa liczba węzłów w wierszu (w grafie nie musi znajdować się wiersz o takiej liczbie węzłów)
+    \item Indeksy węzłów w poszczególnych wierszach - liczba wszystkich indeksów odpowiada liczbie węzłów grafu
+    \item Wskaźniki na pierwsze indeksy węzłów w liście wierszy z punktu 2
+    \item Grupy węzłów połączone przy pomocy krawędzi
+    \item Wskaźniki na pierwsze węzły w poszczególnych grupach z punktu 4. Ta sekcja może występować w pliku wielokrotnie, co oznacza, że plik zawiera więcej niż jeden graf.
+\end{enumerate}
+\subsection{plik .out}
+    plik .out jest plikiem wyjściowym z programu ze strony \textit{https://github.com/SBQD-nng/Dzielenie-Grafu}
+
+\section{Opis plików wyjściowy}
+plik wyjściowy jest zapisywany w formacie .csrrg (opis formatu w seckcji 3.1)
+
+
+\section{Implementacja}
+Po klinując przycisku \textit{Przetnij i Zapisz} program wykona podaną liczę cięć. \\
+Program każde cięcie traktuje oddzielnie, każdy podział utworzy dokładnie dwa grafy których rozmiar spełnia poniży wzór:
+\[\frac{|b-a|}{\frac{a+b}{2}}<q\] Gdzie \textbf{a} i \textbf{b} to rozmiary nowo powstałych grafów a \textbf{q} to margines podawany przy wywołaniu \\
+Przykładowo jeśli kazał byś graf o 8 wierzchołkach podzielić 3 razy z marginesem 0.1 to otrzymach grafy o ramiarach 2, 2 i 4
+
+\section{Zastosowana metoda podziału}
+Do podziału grafu jest wykorzystany algorytm Stoer–Wagner aby zapewnić możliwie najmniejsza liczę przerwanych krawędzi. W przypadku, kiedy podział się nie uda graf pozostanie niezmieniony. \\
+Algorytm Stoer–Wagner posiada pewną dozę losowości w efekcie dla tych samych warunków początkowych może być uzyskany inny wynik
+\section{Link do programu}
+https://github.com/PwAAstud/JIMP\_Projekt\_2025\_JAVA.git
+\end{document}
