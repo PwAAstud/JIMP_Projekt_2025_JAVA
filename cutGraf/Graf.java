@@ -71,26 +71,24 @@ public class Graf{
                 curentNode.conectTo(grafNodes.get(conectionList.get(j)));
             }
         }
-
-
-        // for (Node n : grafNodes) {
-        //     System.err.println(n.getId() + " " + n.getConection());
-        // }
     }
 
     private ArrayList<Integer> readIntLineFromBytes(InputStream input){
         ArrayList<Integer> retVal = new ArrayList<Integer>();
         while (true) {
             int curentInt = 0;
-            byte[] bufer;
+            byte[] bufer = new byte[4];
+            int readed = 0;
 
             try {
-                bufer = input.readNBytes(4);
+                readed = input.read(bufer, 0, 4);
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
             }
-            if(bufer.length == 0){
+            System.out.println(readed);
+
+            if (readed <= 0) {
                 break;
             }
             for(int i = 0; i< 4; i++){
@@ -191,7 +189,7 @@ public class Graf{
             nodesToSave.sort(null);
 
             // sprawdzanie poprawnosci danych wejsciowych
-            if(nodesToSave.getFirst().getId() != 0){
+            if(nodesToSave.get(0).getId() != 0){
                 throw new IllegalArgumentException("brakuje id 0");
             }
             for (int i = 1; i < nodesToSave.size(); i++) {
@@ -212,7 +210,7 @@ public class Graf{
                     curentY+=1;
                 }
             }
-            yRow.add(nodesToSave.getLast().getId() + 1);
+            yRow.add(nodesToSave.get(nodesToSave.size()-1).getId() + 1);
 
             conToSave = new ArrayList<Integer>();
             conRange = new ArrayList<ArrayList<Integer>>();

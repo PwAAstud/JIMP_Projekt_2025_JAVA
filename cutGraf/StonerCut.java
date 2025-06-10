@@ -37,7 +37,6 @@ public class StonerCut implements Graf.GrafCutFinder{
             String conString = "";
             for (Map.Entry<WeightNode, Integer> entry : conection.entrySet()) {
                 conString += String.valueOf( entry.getKey().compinationOf.get(0).getId() ) + ":" + entry.getValue() + " ";
-                // conString += entry.getValue() + " ";
             }
             if(conString != ""){
                 conString = conString.substring(0, conString.length()-1);
@@ -50,7 +49,6 @@ public class StonerCut implements Graf.GrafCutFinder{
             combinationStirng = combinationStirng.substring(0, combinationStirng.length()-1);
             combinationStirng = "(" + combinationStirng + ")";
             return combinationStirng + ":" + conString;
-            // return compinationOf.toString();
         }
 
         @Override
@@ -113,7 +111,6 @@ public class StonerCut implements Graf.GrafCutFinder{
         @Override
         public String toString() {
             String retString = "";
-            // retString += bigestValue + "\n";
             for (int i = 0; i < buckets.size(); i++) {
                 retString += i+1 + ":";
                 for (WeightNode node : buckets.get(i)) {
@@ -129,9 +126,9 @@ public class StonerCut implements Graf.GrafCutFinder{
     private WeightNode getNextBestNode(WeightsBuckets buckets){
         ArrayList<WeightNode> list = buckets.getHiestList();
         if(list.size() == 1){
-            return list.getLast();
+            return list.get(list.size()-1);
         }
-        WeightNode last = list.getLast();
+        WeightNode last = list.get(list.size()-1);
         WeightNode preLast = list.get(list.size()-2);
         if(last.compinationOf.size() > preLast.compinationOf.size()){
             return preLast;
@@ -184,16 +181,10 @@ public class StonerCut implements Graf.GrafCutFinder{
                 aceptableNodes.clear();
                 aceptableNodes.add(entryKey);
                 conectionStrenght = entryVal;
-                // nodeToMergeWith = entryKey;
             }
             else if(entryVal == conectionStrenght){
                 aceptableNodes.add(entryKey);
             }
-            // System.out.println(aceptableNodes);
-            // else if(entryVal == conectionStrenght && rand.nextBoolean()){
-            //     conectionStrenght = entryVal;
-            //     nodeToMergeWith = entryKey;
-            // }
         }
         // System.out.println(aceptableNodes.size());
         if(aceptableNodes.size() == 0){
@@ -263,10 +254,7 @@ public class StonerCut implements Graf.GrafCutFinder{
         }
         // System.out.println(weighGraf);
 
-        // weighGraf.get(3).addMerge(weighGraf.get(4));
-        // System.out.println(retVal);
         return retVal;
-        // throw new UnsupportedOperationException("Unimplemented method 'nodesFromSecentGraf'");
     }
 
 }

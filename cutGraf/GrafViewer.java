@@ -214,7 +214,6 @@ public class GrafViewer extends JFrame {
             return;
         }
 
-        // grafy.clear();
         int grafi = 0;
         Graf working = grafy.get(grafi);
         for (int i = 0; i < splits - 1; i++) {
@@ -228,7 +227,6 @@ public class GrafViewer extends JFrame {
                 break;
             }
         }
-        // grafy.add(working); // ostatnia część
         
         loadButton.setEnabled(true);
         try {
@@ -250,7 +248,7 @@ public class GrafViewer extends JFrame {
             @Override
             public void run() {
                 splitAndSaveGraph();
-                // // super.run();
+
                 grafPanel.revalidate();
                 grafPanel.repaint();
                 Thread.currentThread().interrupt();
