@@ -169,7 +169,7 @@ public class Graf{
                     conToSave.add(c.getId());
                 }
                 if(isBigeId == false){
-                    conToSave.removeLast();
+                    conToSave.remove(conToSave.size() - 1);
                 }else{
                     newList.add(conToSave.size());
                 }
