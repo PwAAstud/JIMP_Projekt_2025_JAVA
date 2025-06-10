@@ -1,2 +1,2 @@
 @echo off
-java -cp .\build cutGraf.MainTest
+java -cp .\build cutGraf.GrafViewer
